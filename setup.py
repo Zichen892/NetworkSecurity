@@ -1,38 +1,24 @@
-'''
-The setup.py file is an essential part of packaging and distributing python projects. 
-It is used by setuptools (or distutils in older Python versions) to define the configuration
-of your project, such as its metadata, dependencies, and more
-'''
+"""Package metadata kept compatible with older pip editable installs."""
 
-from setuptools import find_packages, setup 
-from typing import List 
+from pathlib import Path
 
-def get_requirements()->List[str]:
-    '''
-    This function will return list of requirements
-    '''
-    requirement_lst:List[str] = []
-    try:
-        with open("requirements.txt", "r") as file:
-            ## read lines from the file 
-            lines = file.readlines()
-            ## process each line
-            for line in lines:
-                requirement = line.strip()
-                #ignore empty lines and -e 
-                if requirement and requirement!= '-e .':
-                    requirement_lst.append(requirement)
-    except FileNotFoundError:
-        print("requirement.txt not found")
+from setuptools import find_packages, setup
 
-    return requirement_lst
 
 setup(
-    name = "NetworkSecurity", 
-    version = "0.0.1",
-    author = "Zichen Fan",
-    author_email = "zichen028@gmail.com", 
-    packages = find_packages(),
-    install_requirements = get_requirements()
+    name="networksecurity-phishing-triage",
+    version="0.2.0",
+    description="Offline phishing-feature classification and reproducible evaluation",
+    long_description=Path(__file__).with_name("README.md").read_text(encoding="utf-8"),
+    long_description_content_type="text/markdown",
+    author="Zichen Fan",
+    license="MIT",
+    python_requires=">=3.9",
+    packages=find_packages(),
+    install_requires=[],
+    extras_require={"mongo": ["pymongo>=4,<5"]},
+    entry_points={"console_scripts": [
+        "phishing-triage=networksecurity.phishing:main",
+        "url-triage=networksecurity.url_triage:main",
+    ]},
 )
-

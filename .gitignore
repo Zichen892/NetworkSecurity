@@ -1,2 +1,13 @@
-vene_1
-.env 
+.env
+.env.*
+!.env.example
+.DS_Store
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+logs/
+*.log
+predictions.csv
+url-report.json
