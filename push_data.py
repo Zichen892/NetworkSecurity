@@ -1,64 +1,52 @@
-import os 
+"""Optional, explicitly authorized upload of the local feature dataset to MongoDB."""
+
+from __future__ import annotations
+
+import argparse
+import os
+from pathlib import Path
 import sys
-import json
 
-from dotenv import load_dotenv
-load_dotenv()
+from networksecurity.phishing import FEATURES, _read_rows
 
-MONGO_DB_URL = os.getenv("mongo_db_url")
-print(MONGO_DB_URL)
 
-import certifi
-ca = certifi.where()
-
-import pandas as pd 
-import numpy as np
-import pymongo 
-from networksecurity.exception.exception import NetworkSecurityException
-from networksecurity.logging.logger import logging
-
-class NetworkDataExtract():
-    def __init__(self):
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Inspect or upload the local phishing feature CSV")
+    parser.add_argument("--data", type=Path, default=Path("Network_Data/phisingData.csv"))
+    parser.add_argument("--database", default="network_security")
+    parser.add_argument("--collection", default="phishing_features")
+    parser.add_argument("--write", action="store_true", help="Explicitly insert rows into MongoDB")
+    args = parser.parse_args(argv)
+    try:
+        labeled_rows = _read_rows(args.data, labeled=True)
+        if not args.write:
+            print(f"Dry run: {len(labeled_rows)} rows available. Add --write to insert into MongoDB.")
+            return 0
+        uri = os.environ.get("MONGO_DB_URL")
+        if not uri:
+            raise ValueError("Set MONGO_DB_URL in the environment before using --write")
         try:
-            pass
-        except Exception as e:
-            raise NetworkSecurityException(e, sys)
-        
-    def csv_to_json_convertor(self, file_path):
+            from pymongo import MongoClient
+        except ImportError as exc:
+            raise ValueError("Install the optional dependency with pip install '.[mongo]'") from exc
         try:
-            data = pd.read_csv(file_path)
-            data.reset_index(drop=True, inplace = True)
-            records = (json.loads(data.T.to_json()).values())
-            return records
-        except Exception as e:
-            raise NetworkSecurityException(e, sys)
-        
-    
-    def insert_data_mongodb(self, records, database, collection):
-        try: 
-            self.database = database
-            self.collection = collection
-            self.records = records 
+            with MongoClient(uri, serverSelectionTimeoutMS=5000) as client:
+                client.admin.command("ping")
+                collection = client[args.database][args.collection]
+                for start in range(0, len(labeled_rows), 500):
+                    batch = [dict(zip(FEATURES, features), Result=label)
+                             for features, label in labeled_rows[start:start + 500]]
+                    collection.insert_many(batch)
+        except Exception:
+            # Driver errors may include server details. Keep public logs minimal.
+            print("MongoDB import failed. Check connection and data privately.", file=sys.stderr)
+            return 1
+        print(f"Inserted {len(labeled_rows)} rows into {args.database}.{args.collection}.")
+        return 0
+    except (OSError, UnicodeError, ValueError) as exc:
+        print(f"push_data: {exc}", file=sys.stderr)
+        return 2
 
-            self.mongo_client = pymongo.MongoClient(MONGO_DB_URL)
-            self.database = self.mongo_client[self.database]
-
-            self.collection = self.database[self.collection]
-            self.collection.insert_many(self.records)
-            return(len(self.records))
-        except Exception as e:
-            raise NetworkSecurityException(e, sys)
-        
 
 if __name__ == "__main__":
-    FILE_PATH = "Network_Data/phisingData.csv"
-    DATABASE = "Rachel_etl"
-    Collection = "NetworkData"
-    networkobj = NetworkDataExtract()
-    networkobj.csv_to_json_convertor(file_path=FILE_PATH)
-    records = networkobj.csv_to_json_convertor(file_path = FILE_PATH)
-    print(records)
-    no_of_records = networkobj.insert_data_mongodb(records, DATABASE, Collection)
-    print(no_of_records)
-
-
+    raise SystemExit(main())

@@ -1,0 +1,4 @@
+https://example.test/login
+http://192.0.2.10/sign-in
+https://xn--e1afmkfd.example/verify
+https://example.test/continue?next=https%3A%2F%2Fother.example%2Flogin

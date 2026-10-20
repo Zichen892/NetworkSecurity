@@ -1,0 +1,31 @@
+{
+  "dataset": "UCI Phishing Websites (repository CSV copy)",
+  "dataset_sha256": "e20bf913b6c2e669f4e875e5d223be2542cc7c79a7b62d284ae9d9627c3d9678",
+  "duplicate_feature_rows": 5270,
+  "feature_vectors_with_conflicting_labels": 64,
+  "holdout": {
+    "accuracy": 0.9318181818181818,
+    "actual_legitimate": 1221,
+    "actual_phishing": 891,
+    "confusion_matrix": {
+      "false_negative": 83,
+      "false_positive": 61,
+      "true_negative": 1160,
+      "true_positive": 808
+    },
+    "phishing_f1": 0.9181818181818182,
+    "phishing_precision": 0.9298043728423475,
+    "phishing_recall": 0.9068462401795735,
+    "samples": 2112
+  },
+  "holdout_rows": 2112,
+  "method": "Categorical Naive Bayes with Laplace smoothing; 80/20 seeded split by unique feature vector",
+  "phishing_label": -1,
+  "saved_model_note": "Saved model is refit on all rows after holdout evaluation; holdout metrics are from the training-only model.",
+  "seed": 42,
+  "threshold": 0.5,
+  "total_rows": 11055,
+  "training_majority_class_baseline_accuracy": 0.578125,
+  "training_rows": 8943,
+  "unique_feature_vectors": 5785
+}

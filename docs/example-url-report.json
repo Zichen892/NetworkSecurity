@@ -1,0 +1,50 @@
+{
+  "tool": "offline-url-triage",
+  "urls_checked": 4,
+  "results": [
+    {
+      "line": 1,
+      "host": "example.test",
+      "flags": []
+    },
+    {
+      "line": 2,
+      "host": "192.0.2.10",
+      "flags": [
+        {
+          "code": "plain-http",
+          "severity": "review",
+          "detail": "The link uses HTTP rather than HTTPS."
+        },
+        {
+          "code": "ip-host",
+          "severity": "review",
+          "detail": "The link uses an IP address instead of a domain name."
+        }
+      ]
+    },
+    {
+      "line": 3,
+      "host": "xn--e1afmkfd.example",
+      "flags": [
+        {
+          "code": "punycode-host",
+          "severity": "review",
+          "detail": "The domain contains an internationalized punycode label."
+        }
+      ]
+    },
+    {
+      "line": 4,
+      "host": "example.test",
+      "flags": [
+        {
+          "code": "nested-destination",
+          "severity": "review",
+          "detail": "A query parameter contains another HTTP(S) destination."
+        }
+      ]
+    }
+  ],
+  "note": "Heuristic review signals only; no URLs were opened or classified as safe."
+}
